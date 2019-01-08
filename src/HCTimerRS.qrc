@@ -1,0 +1,41 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/avatar_hover.png</file>
+        <file>images/avatar_logo.png</file>
+        <file>images/avatar.png</file>
+        <file>images/avatar1.png</file>
+        <file>images/avatar2.png</file>
+        <file>images/avatar3.png</file>
+        <file>images/avatar4.png</file>
+        <file>images/avatar5.png</file>
+        <file>images/btn_back.png</file>
+        <file>images/btn_close_hover.png</file>
+        <file>images/btn_close.png</file>
+        <file>images/btn_edit_hover.png</file>
+        <file>images/btn_edit.png</file>
+        <file>images/btn_forward.png</file>
+        <file>images/btn_info_hover.png</file>
+        <file>images/btn_info.png</file>
+        <file>images/btn_minimize_hover.png</file>
+        <file>images/btn_minimize.png</file>
+        <file>images/btn_radio_active.png</file>
+        <file>images/btn_radio.png</file>
+        <file>images/btn_select.png</file>
+        <file>images/btn_setting_hover.png</file>
+        <file>images/btn_setting.png</file>
+        <file>images/close_small_hover.png</file>
+        <file>images/close_small.png</file>
+        <file>images/confirm_hover.png</file>
+        <file>images/confirm.png</file>
+        <file>images/hclab_logo.png</file>
+        <file>images/icon_48x48.png</file>
+        <file>images/icon_240x240.png</file>
+        <file>images/info_logo_hover.png</file>
+        <file>images/info_logo_pressed.png</file>
+        <file>images/info_logo.png</file>
+        <file>images/my_avatar.png</file>
+        <file>images/tri.png</file>
+        <file>images/btn_search.png</file>
+        <file>images/btn_search_hover.png</file>
+    </qresource>
+</RCC>
