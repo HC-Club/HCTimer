@@ -21,13 +21,15 @@ typedef struct AllUsers{
 
 class UserData
 {
+
+protected:
+UserData();
 private:
-    UserData();
+
 
     int timeCount;
     int userTotalTime;
     int userTodayTime;
-
     QString userID;
     QString userAccount;
     QString userPassWord;
@@ -60,6 +62,7 @@ public:
     QString downloadURL;
 
     int userTime[7];
+    //饿汉单例模式    2018-04-03
     static UserData* getUserData();
 
     void setUserID(QString _id);

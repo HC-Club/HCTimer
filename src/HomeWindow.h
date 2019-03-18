@@ -67,8 +67,8 @@ private:
     DOHelper *http;
     Monitor *monitor;
 
-    QTimer *updateTimer;
-    QTimer *timer;
+  //  QTimer *updateTimer;
+ //   QTimer *timer;
     QTimer *timerOpacity;
 
     int level;

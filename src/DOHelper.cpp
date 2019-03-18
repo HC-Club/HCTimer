@@ -26,6 +26,17 @@ void DOHelper::getServerDateRequst()
     netWorker->get(request);
 }
 
+
+//加密函数-------------------修改位置
+
+uint DOHelper::encrypt(uint data){
+    data ^= dataKey1;
+    data -= firstMove;
+    data ^= dataKey2;
+    data += secondMove;
+    return data;
+}
+
 void DOHelper::addRecordRequst(QString userId,QString timesDate)
 {
     QNetworkRequest request;
@@ -36,12 +47,16 @@ void DOHelper::addRecordRequst(QString userId,QString timesDate)
     netWorker->get(request);
 }
 
-void DOHelper::updateRecordRequst(QString userId, QString timesDate, int timesCount)
+
+void DOHelper::updateRecordRequst(QString userId, QString timesDate, uint timesCount)
 {
     QNetworkRequest request;
     QString requestUrl;
+//-----------修改位置-----------
+    uint e_timesCount;
+    e_timesCount = encrypt(timesCount);
     requestUrl=requestUrl+"Times/updateRecord?"+"user_id="+userId+"&times_date="
-              +timesDate+"&times_count="+QString::number(timesCount)
+              +timesDate+"&times_count="+QString::number(e_timesCount)
               +"&versions="+VERSION_STR;
     request.setUrl(QUrl(BASIC_URL+requestUrl));
     netWorkerAction=UpdateRecordAction;
@@ -172,6 +187,7 @@ DOHelper::DOHelper(QObject *)
 
 
 /**********网络请求完毕后的响应函数*************/
+
 void DOHelper::replyfinished(QNetworkReply *reply)
 {
     QByteArray byteArray;
@@ -200,7 +216,7 @@ void DOHelper::replyfinished(QNetworkReply *reply)
             switch(netWorkerAction)
             {
                 /*****获取服务器计时器更新版本响应****/
-                case GetUpdateVersionsAction:
+               case GetUpdateVersionsAction:
                     if(code==0)
                     {
                         if(!result["versions"].toString().isEmpty())
@@ -211,6 +227,14 @@ void DOHelper::replyfinished(QNetworkReply *reply)
                             userData->isGetUpdateVersion = true;
                         qDebug()<<"版本:"<<userData->updateVersions;
                         qDebug()<<"下载链接:"<<userData->downloadURL;
+                        QFile file( "downloadURL.txt" );
+                        //QIODevice::Truncate 以重写的方式打开，再写入新的数据
+                        if ( file.open( QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text ) ) {
+                            QTextStream stream( &file );
+                            stream << userData->downloadURL<<"\n";
+                            file.close();
+                        }
+
                     }
                     else{
                         //
@@ -370,7 +394,7 @@ void DOHelper::replyfinished(QNetworkReply *reply)
                     break;
                 /*****登录响应****/
                 case LoginAction:
-                    if(code==0){                      
+                    if(code==0){
                         if(!result["user_id"].toString().isEmpty())
                             userData->setUserID(result["user_id"].toString());
                         if(!userData->getUserID().isEmpty() && !userData->getstartDate_own().isNull()
@@ -541,3 +565,4 @@ void DOHelper::replyfinished(QNetworkReply *reply)
     }
     reply->deleteLater();
 }
+

@@ -37,5 +37,9 @@
         <file>images/tri.png</file>
         <file>images/btn_search.png</file>
         <file>images/btn_search_hover.png</file>
+        <file>sounds/after_class.mp3</file>
+        <file>sounds/class.mp3</file>
+        <file>sounds/di_da_sound.mp3</file>
+        <file>sounds/moonlight_in_the_city.mp3</file>
     </qresource>
 </RCC>

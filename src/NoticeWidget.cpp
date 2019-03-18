@@ -11,6 +11,7 @@ NoticeWidget::NoticeWidget(QWidget *parent) : QWidget(parent)
 
 void NoticeWidget::initLayout()
 {
+
     QFont ft;
     ft.setPixelSize(16);
     ft.setFamily("冬青黑体简体中文 W3");

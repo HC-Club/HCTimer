@@ -28,11 +28,10 @@ DesktopWidget::DesktopWidget(QWidget *parent)
     http = DOHelper::getDOHelper();
     monitor = Monitor::getMonitor();
 
+
     playList = new QMediaPlaylist(this);
 
-    QDir dir;
-    QString path = dir.currentPath();
-    playList->addMedia(QUrl::fromLocalFile(path+QString("/sounds/di_da_sound.mp3")));
+    playList->addMedia(QMediaContent(QUrl(":sounds\\di_da_sound.mp3")));
     playList->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
 
     cueMediaPlayer = new QMediaPlayer(this);
@@ -40,7 +39,8 @@ DesktopWidget::DesktopWidget(QWidget *parent)
 
     workSoundPlayer = new QMediaPlayer(this);
     workSoundPlayer->setVolume(volume);
-    workSoundPlayer->setPlaylist(playList);
+
+  //  workSoundPlayer->setPlaylist(playList);                               //神级bug代码，开了像病毒一样强，占30%CPU
 
 
     tomatoTimer = new QTimer(this);
@@ -201,9 +201,7 @@ void DesktopWidget::slotTomatoTimer()
     }
     else if(tomatoFinishedCount<3 && isInTomatoTime){
         tomatoFinishedCount++;
-        QDir dir;
-        QString path = dir.currentPath();
-        cueMediaPlayer->setMedia(QUrl::fromLocalFile(path+QString("/sounds/after_class.mp3")));
+        cueMediaPlayer->setMedia(QMediaContent(QUrl(":sounds\\after_class.mp3")));
         if(isStartWorkSound)
             workSoundPlayer->stop();
         cueMediaPlayer->play();
@@ -230,9 +228,7 @@ void DesktopWidget::slotTomatoTimer()
         }
     }
     else if(isInRestTime){
-        QDir dir;
-        QString path = dir.currentPath();
-        cueMediaPlayer->setMedia(QUrl::fromLocalFile(path+QString("/sounds/class.mp3")));
+        cueMediaPlayer->setMedia(QMediaContent(QUrl(":sounds\\class.mp3")));
         if(isStartWorkSound)
             workSoundPlayer->stop();
         cueMediaPlayer->play();
@@ -260,9 +256,7 @@ void DesktopWidget::slotTomatoTimer()
         }
     }
     else if(tomatoFinishedCount>=3 && isInTomatoTime){
-        QDir dir;
-        QString path = dir.currentPath();
-        cueMediaPlayer->setMedia(QUrl::fromLocalFile(path+QString("/sounds/after_class.mp3")));
+        cueMediaPlayer->setMedia(QMediaContent(QUrl(":sounds\\after_class.mp3")));
         if(isStartWorkSound)
             workSoundPlayer->stop();
         cueMediaPlayer->play();
@@ -271,7 +265,7 @@ void DesktopWidget::slotTomatoTimer()
             cueMediaPlayer->stop();
             if(isStartWorkSound)
                 workSoundPlayer->stop();
-            cueMediaPlayer->setMedia(QUrl::fromLocalFile(path+QString("/sounds/moonlight_in_the_city.mp3")));
+            cueMediaPlayer->setMedia(QMediaContent(QUrl(":sounds\\moonlight_in_the_city.mp3")));
             cueMediaPlayer->play();
             tomatoFinishedCount = 0;
             isInTomatoTime = false;
@@ -292,9 +286,7 @@ void DesktopWidget::slotTomatoTimer()
         }
     }
     else if(isInLongRestTime){
-        QDir dir;
-        QString path = dir.currentPath();
-        cueMediaPlayer->setMedia(QUrl::fromLocalFile(path+QString("/sounds/class.mp3")));
+        cueMediaPlayer->setMedia(QMediaContent(QUrl(":sounds\\class.mp3")));
         if(isStartWorkSound)
             workSoundPlayer->stop();
         cueMediaPlayer->play();
@@ -334,6 +326,7 @@ void DesktopWidget::contextMenuEvent(QContextMenuEvent *) //右键菜单项编�
 
 void DesktopWidget::paintEvent(QPaintEvent *)
 {
+
     if(countDownTime >= 0 && isInTomatoTime)
         circleValue = 100-100*countDownTime/tomatoTime/60;
     else if(countDownTime >= 0 && isInRestTime)

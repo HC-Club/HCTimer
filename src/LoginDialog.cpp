@@ -70,6 +70,8 @@ void LoginDialog::initInterface()
     connect(closeBtn,SIGNAL(clicked()),this,SLOT(close()));
     connect(loginBtn,SIGNAL(clicked()),this,SLOT(loginBtnClick()));
     connect(registBtn,SIGNAL(clicked()),this,SLOT(registBtnClick()));
+    connect(passwordEdit,SIGNAL(returnPressed()),this,SLOT(loginBtnClick()),Qt::UniqueConnection);
+    connect(accountEdit,SIGNAL(returnPressed()),this,SLOT(loginBtnClick()),Qt::UniqueConnection);
 }
 
 void LoginDialog::mousePressEvent(QMouseEvent *event)

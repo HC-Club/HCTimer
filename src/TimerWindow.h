@@ -39,6 +39,7 @@
 #include "SystemTrayIcon.h"
 #include "InquirySpecificTimeDialog.h"
 #include <QtMath>
+#include <cstdlib>
 #include <QByteArray>
 #include "Updater.h"
 

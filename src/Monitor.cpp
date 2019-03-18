@@ -57,7 +57,10 @@ bool Monitor::isCanUpdate()
 Monitor *Monitor::getMonitor()
 {
     static Monitor monitor;
+
     return &monitor;
+//    Monitor* Monitor::p = new Monitor;
+//    return p;
 }
 
 Monitor::Monitor(QObject *)
@@ -97,18 +100,19 @@ bool Monitor::isUserOnline()
     foreach(QHostAddress address, info.addresses()){
         if(address.protocol() == QAbstractSocket::IPv4Protocol){
             IP=address.toString();
+//            qDebug()<<IP<<endl;
+            if (IP.startsWith( MONITOR_IP_PREIX ) || IP.startsWith(MONITOR_IP_PREXI2)){
+             return true;
+             }
         }
     }
-    if (IP.startsWith( MONITOR_IP_PREIX )){
-        return true;
-    }
-    else{
-        return false;
-    }
+     return false;
 }
+
 
 bool Monitor::isLabRouter()
 {
+
 #if WINDOWS_VERSION
     #define EXECDOSCMD "arp -a" //命令
 
@@ -137,7 +141,7 @@ bool Monitor::isLabRouter()
     //关键步骤，CreateProcess函数参数意义请查阅MSDN
     QString str(command);
 
-    if (!CreateProcess(NULL, (LPWSTR)str.utf16(),NULL,NULL,TRUE,NULL,NULL,NULL,&si,&pi))
+    if (!CreateProcess(NULL, (LPWSTR)str.utf16(),NULL,NULL,TRUE,0,NULL,NULL,&si,&pi))
     {
         CloseHandle(hWrite);
         CloseHandle(hRead);
@@ -151,18 +155,20 @@ bool Monitor::isLabRouter()
     QString strArp;
     while (true)
     {
-        if (ReadFile(hRead,buffer,4095,&bytesRead,NULL) == NULL)
-        break;
+        if (!ReadFile(hRead,buffer,4095,&bytesRead,NULL))
+           break;
         //buffer中就是执行的结果，可以保存到文本，也可以直接输出
         QString strTemp(buffer);
         strArp = strTemp;
     }
-    QString ip[3];
-    ip[0] = "30-fc-68-43-bc-00";
-    ip[1] = "fc-d7-33-52-d4-46";
-    ip[2] = "e4-d3-32-45-2c-14";
+    const int routerNumber = 4;
+    QString ip[routerNumber];
+    ip[0] = "30-fc-68-43-bc-00";      //hc-gray
+    ip[1] = "fc-d7-33-52-d4-46";      //hc-blue
+    ip[2] = "e4-d3-32-45-2c-14";      //hc-black
+    ip[3] = "8c-ab-8e-33-72-91";      //hc-2.4g
 
-    for(int k = 0;k < 3;k++){
+    for(int k = 0;k < routerNumber;k++){
         int i = 0,j = 0;
         while(i < strArp.length() && j < ip[k].length()){
             if(strArp[i] == ip[k][j]){
@@ -180,6 +186,7 @@ bool Monitor::isLabRouter()
             }
         }
     }
+    strArp.clear();
     CloseHandle(hRead);
     isLabRouterMAC = false;
     return false;

@@ -23,14 +23,15 @@ TimerWindow::TimerWindow(QWidget *parent)
     getUpdateVersionsCount = 0;
 
     desktopWidget = new DesktopWidget();
+
     if(isStartDesktopWidget)
-        desktopWidget->show();
+         desktopWidget->show();
     else
-        desktopWidget->hide();
+         desktopWidget->hide();
 
     initLayout();
 
-    createConnect();
+   createConnect();
 
     resize(672,452);
 
@@ -47,6 +48,7 @@ TimerWindow::TimerWindow(QWidget *parent)
     detect = new QTimer(this);//用于刷新界面，还有对是否登陆的监控
     connect(detect,SIGNAL(timeout()),this,SLOT(slotDetect()));
     detect->start(1000);
+  //  QTest::qSleep(1000);
 }
 
 void TimerWindow::runCMD(QString command)
@@ -146,8 +148,10 @@ void TimerWindow::initLayout()
 /**
  * @brief TimerWindow::createConnect 建立信号和槽
  */
+
 void TimerWindow::createConnect()
 {
+
     connect(titleBar->avatarBtn,SIGNAL(clicked()),
             this,SLOT(slotLogin()));
     connect(titleBar->btnAddNotice, SIGNAL(clicked()),
@@ -178,7 +182,7 @@ void TimerWindow::createConnect()
 void TimerWindow::createTrayIcon()
 {
     trayIcon = SystemTrayIcon::getInstance();
-    trayIcon->setIcon(QIcon(":images/icon_48x48.png"));
+    trayIcon->setIcon(QIcon(":/images/icon_48x48.png"));
     trayIcon->setToolTip(tr("HC Timer"));
 
     trayMenu = new QMenu(this);
@@ -237,8 +241,10 @@ bool TimerWindow::readConfigToLogin()
  * @brief TimerWindow::slotDetect 定时器监控函数，用于监控网络延时造成用户名标签没更新，
  *                                没有获取服务器时间，没有登录等情况
  */
+
 void TimerWindow::slotDetect()
 {
+
     homeWindow->updateUserData();
     if(userData->isLogin && !userData->getUserName().isEmpty())
     {
@@ -742,8 +748,8 @@ void TimerWindow::slotCloseApplication()
  */
 void TimerWindow::slotShowDesktopWidget()
 {
-    if(desktopWidget->isHidden()){
-        desktopWidget->show();
+    if( desktopWidget->isHidden()){
+         desktopWidget->show();
     }
     else
         return;
@@ -818,4 +824,5 @@ void TimerWindow::paintEvent(QPaintEvent *)
         painter.setPen(color);
         painter.drawPath(path);
     }
+
 }

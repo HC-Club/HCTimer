@@ -1,5 +1,7 @@
 #include "UserData.h"
 
+
+
 UserData::UserData()   //构造函数是私有的
 {
     initData();
@@ -9,6 +11,8 @@ UserData *UserData::getUserData()
 {
     static UserData userData;   //局部静态变量
     return &userData;
+//      UserData* UserData::p = new UserData;
+//      return p;
 }
 
 void UserData::setUserID(QString _id)

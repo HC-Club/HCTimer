@@ -1,3 +1,6 @@
+
+
+
 #include "SystemTrayIcon.h"
 
 SystemTrayIcon::SystemTrayIcon(QSystemTrayIcon *)

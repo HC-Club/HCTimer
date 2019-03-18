@@ -25,7 +25,7 @@ void AboutDialog::initInterface()
     connect(closeBtn,SIGNAL(clicked()),this,SLOT(close()));
 
     applicationLogo = new QLabel(this);
-    applicationLogo->setPixmap(QPixmap(":images/info_logo.png"));
+    applicationLogo->setPixmap(QPixmap(":/images/info_logo.png"));
     applicationLogo->setToolTip(tr("<img src=\":/images/hclab_logo.png\">"
                                    "&nbsp;开发人员简介："
                                    "<ul>"

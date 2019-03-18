@@ -1,6 +1,7 @@
 #include "TimerWindow.h"
 #include <QApplication>
 #include "define.h"
+#include "Monitor.h"
 
 #if WINDOWS_VERSION   //for win
 
@@ -56,7 +57,6 @@ int main(int argc, char *argv[])
     //检查程序是否 已经启动过
     if(isOnlyApplication()==false)
         return 0;
-
     TimerWindow w;
     w.show();
 
