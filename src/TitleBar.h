@@ -19,7 +19,7 @@
 #include <QPalette>
 #include <QPushButton>
 #include <QDebug>
-#include "UserData.h"
+#include "user.h"
 
 class TitleBar : public QWidget
 {
@@ -36,8 +36,10 @@ public:
     QPushButton *btnAddNotice;
     QPushButton *btnInquirySpecificTime;
 
+    void setUser(const User &user);
+    void setNoUser();
+
 private:
-    UserData *userData;
     void initLayout();
 };
 

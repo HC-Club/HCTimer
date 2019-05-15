@@ -12,8 +12,7 @@
 #include <QMessageBox>
 #include <QtMath>
 #include <QPainter>
-#include "DOHelper.h"
-#include "UserData.h"
+#include "myserver.h"
 
 class RegistDialog : public QDialog
 {
@@ -33,25 +32,31 @@ public:
     QLineEdit *gradeEdit;
     QLineEdit *confirmPwdEdit;
     QComboBox *sexComboBox;
-
-
+    /**
+     * @brief 设置服务类
+     * @param server
+     */
+    void setServer(MyServer *server);
 protected:
 
     QPoint beginDrag;
     bool bPressFlag;
     void initLayout();
-    DOHelper *http;
-    UserData *userData;
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *);
 
+
+
 private:
     int themeColor;
+    MyServer *m_server;
 
 public slots:
     void soltConfirmBtn();
+    void Server_RegisterFail(const QString &message);
+    void Server_RegisterSuccess(const QString &message);
 };
 
 #endif // REGISTDIALOG_H

@@ -6,7 +6,8 @@
 #include <QString>
 #include <QPainter>
 #include <QPoint>
-#include "UserData.h"
+#include <QDebug>
+#include "user.h"
 
 class StatisticsWindow : public QWidget
 {
@@ -15,10 +16,11 @@ class StatisticsWindow : public QWidget
 public:
     explicit StatisticsWindow(QWidget *parent = 0);
     void initTimeCoord();
-    void setTimeCoord();
+
+
+    void setUser(const User &user);
 
 private:
-    UserData *userData;
 
     QLabel *in;
     QLabel *dayCount;
@@ -33,12 +35,16 @@ private:
     QLabel *triLabel;
 
     QPoint timeCoord[7];
+    int totalCount;
+
     int todayNum;
 
     int themeColor;
 
     void createLable();
     void paintEvent(QPaintEvent *);
+    void setTimeCoord(int count[]);
+    void setThemeColor(const int &_themeColor);
 };
 
 #endif // STATISTICSWINDOW_H

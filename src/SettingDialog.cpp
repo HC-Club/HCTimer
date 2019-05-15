@@ -188,8 +188,8 @@ void SettingDialog::slotCloseBtn()
         settings->setValue("Config/isStartDesktopWidget",isStartDesktopWidget);
         settings->setValue("Config/isAutoBoot",isAutoBoot);
         setAutoBoot(isAutoBoot);
-        QMessageBox::about(this,"温馨提示","您的设置信息已保存，将在下次启动应用程序时生效！");
     }
+    emit sSetting(themeColor);
     this->close();
 }
 

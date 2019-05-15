@@ -13,7 +13,6 @@
 #include <QObject>
 #include <QTimer>
 #include <QDebug>
-#include "UserData.h"
 
 #if WINDOWS_VERSION
     #include <windows.h>
@@ -38,7 +37,6 @@ private:
     explicit Monitor(QObject *parent = 0);
     ~Monitor();
     QTimer *timer;
-    UserData *userData = UserData::getUserData();
 
 private slots:
     void upDateTime();

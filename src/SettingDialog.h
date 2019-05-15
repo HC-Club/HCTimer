@@ -58,6 +58,9 @@ public slots:
     void slotOrangeBtn();
     void slotRedBtn();
     void slotCloseBtn();
+
+signals:
+    void sSetting(const int &themeColor);
 };
 
 #endif // SETTINGDIALOG_H

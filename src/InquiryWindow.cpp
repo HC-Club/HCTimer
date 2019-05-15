@@ -3,17 +3,13 @@
 InquiryWindow::InquiryWindow(QWidget *parent) : QWidget(parent)
 {
     resize(652,320);
-    userData = UserData::getUserData();
-    http = DOHelper::getDOHelper();
-    themeColor = userData->getThemeColor();
+    themeColor = 0;
     initLayout();
-//    showAllUserTime();
 }
 
 void InquiryWindow::initLayout()
 {
     //背景设置
-    QPalette pa;
     pa.setColor(QPalette::Background, QColor(230,230,230));
     this->setPalette(pa);
     this->setAutoFillBackground(true);
@@ -33,9 +29,9 @@ void InquiryWindow::initLayout()
     triLabel->setPixmap(QPixmap(":images/tri.png"));
     triLabel->setGeometry(344,290,16,16);
 
-    QLabel *text1 = new QLabel(this);
-    QLabel *text2 = new QLabel(this);
-    QLabel *text3 = new QLabel(this);
+    text1 = new QLabel(this);
+    text2 = new QLabel(this);
+    text3 = new QLabel(this);
 
     text1->setText(tr("以"));
     text1->setFont(ft);
@@ -55,18 +51,6 @@ void InquiryWindow::initLayout()
     ft.setPixelSize(48);
     ft.setBold(true);
 
-    if(themeColor==0){
-        pa.setColor(QPalette::WindowText,QColor(85,195,239));
-    }
-    else if(themeColor==1){
-        pa.setColor(QPalette::WindowText,QColor(138,230,199));
-    }
-    else if(themeColor==2){
-        pa.setColor(QPalette::WindowText,QColor(255,178,102));
-    }
-    else{
-        pa.setColor(QPalette::WindowText,QColor(255,127,127));
-    }
 
     weekCount->setText(tr("1"));
     weekCount->setFont(ft);
@@ -81,40 +65,10 @@ void InquiryWindow::initLayout()
     timeQualified->move(92,150);
 
     listWidget = new QListWidget(this);
+    listWidget->setStyleSheet("QListWidget{background:rgb(230,230,230)}");
 
     listWidget->setFrameShape(QListWidget::NoFrame);
-    if(themeColor==0){
-        listWidget->setStyleSheet(
-                    "QListWidget{background:transparent;}"
-                    "QListWidget::Item:hover{background:#F0F8FF; }"
-                    "QListWidget::item:selected{background:white;color:#55C3EF; }"
-                    "QScrollBar{background:transparent; height:10px; }"
-                    );
-    }
-    else if(themeColor==1){
-        listWidget->setStyleSheet(
-                    "QListWidget{background:transparent;}"
-                    "QListWidget::Item:hover{background:#F0FFF0; }"
-                    "QListWidget::item:selected{background:white;color:#8AE6C7; }"
-                    "QScrollBar{background:transparent; height:10px; }"
-                    );
-    }
-    else if(themeColor==2){
-        listWidget->setStyleSheet(
-                    "QListWidget{background:transparent;}"
-                    "QListWidget::Item:hover{background:#FFFAF0; }"
-                    "QListWidget::item:selected{background:white;color:#FFD700; }"
-                    "QScrollBar{background:transparent; height:10px; }"
-                    );
-    }
-    else{
-        listWidget->setStyleSheet(
-                    "QListWidget{background:transparent;}"
-                    "QListWidget::Item:hover{background:#FFF0FA; }"
-                    "QListWidget::item:selected{background:white;color:#FF7F7F; }"
-                    "QScrollBar{background:transparent; height:10px; }"
-                    );
-    }
+    setThemeColor(themeColor);
     listWidget->move(240,0);
     listWidget->setIconSize(QSize(64, 40));
     listWidget->resize(384,288);
@@ -142,7 +96,6 @@ void InquiryWindow::changeIsQualified(QString currentText)
         }
     }
     currentUserTime = userTime.toInt(NULL,10);
-
     if(currentUserTime>=24)
         timeQualified->setText("已达标");
     else
@@ -151,20 +104,54 @@ void InquiryWindow::changeIsQualified(QString currentText)
     timeQualified->adjustSize();
 }
 
-void InquiryWindow::showAllUserTime()
+void InquiryWindow::setStatisticBags(const QList<StatisticBag> &list)
 {
     QFont ft;
     ft.setPixelSize(18);
     ft.setFamily("冬青黑体简体中文 W3");
     ft.setBold(false);
 
-    if(!userData->getstartDate_all().isNull() && !userData->getendDate_all().isNull())
-        http->getAllUserTimesRequst(QString(userData->getstartDate_all().toString("yyyy-MM-dd")),
-                                    QString(userData->getendDate_all().toString("yyyy-MM-dd")));
-    else
-        return;
 
-    QList<AllUsers> temp = userData->getAllUsers();
+
+
+
+
+
+
+
+
+    QList<StatisticBag> temp = list;
+
+
+    for(int i=temp.size()-1;i>=0;i--)
+    {
+        const StatisticBag a = temp.at(i);
+        if(a.top!=0)
+        {
+            continue;
+        }
+
+        if(a.timeCount=="0")
+        {
+            temp.removeAt(i);
+        }
+    }
+
+
+    qSort(temp.begin(),temp.end(),Tool::compareStatisticBag);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     if(temp.isEmpty())
         return;
@@ -203,5 +190,33 @@ void InquiryWindow::showAllUserTime()
         listWidget->addItem(userTimeItem);
         listWidget->addItem(space);
     }
-    userData->clearAllUsers();
+}
+
+void InquiryWindow::setUser(const User &user)
+{
+    setThemeColor(user.getThemeColor());
+}
+
+void InquiryWindow::setThemeColor(const int &_themeColor)
+{
+    themeColor = _themeColor;
+
+    if(themeColor==0){
+        pa.setColor(QPalette::WindowText,QColor(85,195,239));
+    }
+    else if(themeColor==1){
+        pa.setColor(QPalette::WindowText,QColor(138,230,199));
+    }
+    else if(themeColor==2){
+        pa.setColor(QPalette::WindowText,QColor(255,178,102));
+    }
+    else{
+        pa.setColor(QPalette::WindowText,QColor(255,127,127));
+    }
+    text1->setPalette(pa);
+    text2->setPalette(pa);
+    text3->setPalette(pa);
+    weekCount->setPalette(pa);
+    timeQualified->setPalette(pa);
+
 }

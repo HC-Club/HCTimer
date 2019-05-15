@@ -11,9 +11,7 @@ UserInfoDialog::UserInfoDialog(QDialog *parent) : QDialog(parent)
     bgPalette.setColor(QPalette::Background, QColor("#FFF"));
     this->setPalette(bgPalette);
     this->setAutoFillBackground(true);
-    userData = UserData::getUserData();
-    http = DOHelper::getDOHelper();
-    themeColor = userData->getThemeColor();
+    themeColor = 0;
     initLayout();
 }
 
@@ -134,10 +132,10 @@ void UserInfoDialog::initLayout()
 
 void UserInfoDialog::setUserInfo()
 {
-    QString userAccount = userData->getUserAccount();
-    QString userName = userData->getUserName();
-    QString userGrade = userData->getUserGrade();
-    QString userSex = userData->getUserSex();
+    QString userAccount = "";
+    QString userName = "";
+    QString userGrade = "";
+    QString userSex = "";
 
     if(!userAccount.isEmpty())
         accountLabel->setText(userAccount);
@@ -180,11 +178,7 @@ void UserInfoDialog::changeAvatar()
 
 void UserInfoDialog::soltLogoutBtn()
 {
-    if(userData->isLogin && !userData->getUserID().isEmpty() && !userData->getServerDate().isValid()){
-        http->updateRecordRequst(userData->getUserID(),userData->getServerDate().toString(Qt::ISODate),
-                             userData->getTodayTime()+userData->getTimeCount());
-    }
-    userData->initData();
+
     this->close();
 }
 

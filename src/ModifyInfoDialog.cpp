@@ -11,9 +11,7 @@ ModifyInfoDialog::ModifyInfoDialog(QDialog *parent) : QDialog(parent)
     bgPalette.setColor(QPalette::Background, QColor("#FFF"));
     this->setPalette(bgPalette);
     this->setAutoFillBackground(true);
-    http = DOHelper::getDOHelper();
-    userData = UserData::getUserData();
-    themeColor = userData->getThemeColor();
+    themeColor = 0;
 
     initLayout();
 }
@@ -62,13 +60,13 @@ void ModifyInfoDialog::initLayout()
 
     accountEdit = new QLineEdit(this);
     accountEdit->setPlaceholderText(tr("  学号"));
-    accountEdit->setText(userData->getUserAccount());
+    accountEdit->setText("");
     accountEdit->resize(144,32);
     accountEdit->move(34,122);
 
     userNameEdit = new QLineEdit(this);
     userNameEdit->setPlaceholderText(tr("  真实姓名"));
-    userNameEdit->setText(userData->getUserName());
+    userNameEdit->setText("");
     userNameEdit->setMaxLength(20);
     userNameEdit->resize(144,32);
     userNameEdit->move(194,122);
@@ -82,7 +80,7 @@ void ModifyInfoDialog::initLayout()
 
     gradeEdit = new QLineEdit(this);
     gradeEdit->setPlaceholderText(tr("  年级"));
-    gradeEdit->setText(userData->getUserGrade());
+    gradeEdit->setText("");
     gradeEdit->setStyleSheet("background-color:#FFFFFF;");
     gradeEdit->resize(144,32);
     gradeEdit->move(194,186);
@@ -132,16 +130,14 @@ void ModifyInfoDialog::soltConfirmBtn()
             ||sexComboBox->currentText().isEmpty()||gradeEdit->text().isEmpty()||newPwdEdit->text().isEmpty()){
         QMessageBox::about(this, "提示", "有些相关信息为空，请认真填写！");
     }
-    else if(oldPwdEdit->text()!= userData->getUserPassword()){
+    else if(oldPwdEdit->text()!= "userData->getUserPassword()"){
         QMessageBox::about(this, "提示", "旧密码错误，请确认后填写！");
     }
     else if(gradeEdit->text().toInt()<1000){
         QMessageBox::about(this, "提示", "请输入正确的年级格式(例：2014)");
     }
     else{
-        if(!userData->getUserID().isEmpty())
-            http->updateUserInfoRequst(userData->getUserID(),accountEdit->text(),userNameEdit->text(),newPwdEdit->text(),
-                        sexComboBox->currentText(),gradeEdit->text());
+        //do something
         this->close();
     }
 }

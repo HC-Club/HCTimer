@@ -10,12 +10,9 @@ StatisticsWindow::StatisticsWindow(QWidget *parent) : QWidget(parent)
 
     resize(652,320);
 
-    userData = UserData::getUserData();
-    themeColor = userData->getThemeColor();
+    themeColor = 0;
     initTimeCoord();
     createLable();
-
-    todayNum = 7;
 }
 
 void StatisticsWindow::createLable()
@@ -116,6 +113,7 @@ void StatisticsWindow::createLable()
     count->move(48,160);
     hourCount->move(89,135);
     hour->move(158,160);
+    todayNum = 7;
 }
 
 void StatisticsWindow::initTimeCoord()
@@ -127,23 +125,56 @@ void StatisticsWindow::initTimeCoord()
     }
 }
 
-void StatisticsWindow::setTimeCoord()
+void StatisticsWindow::setTimeCoord(int count[])
 {
-    if(userData->getServerDate().isNull())
-        return;
     int temp,i;
-    for(i=0;i<userData->getServerDate().dayOfWeek()-1;i++)
+    for(i=0;i<todayNum;i++)
     {
-        temp = 240 - (int)((float)userData->userTime[i]/43200*192);
-        if(userData->userTime[i] > 43200)
+        temp = 240 - (int)((float)count[i]/43200*192);
+        if(100 > 43200)
             temp = 48;
         timeCoord[i].setY(temp);
     }
-    temp = 240 - (int)((float)(userData->userTime[i] + userData->getTimeCount())/43200*192);
-    if(userData->userTime[i] > 43200)
-        temp = 48;
-    timeCoord[i].setY(temp);
     update();
+}
+
+void StatisticsWindow::setThemeColor(const int &_themeColor)
+{
+    themeColor = _themeColor;
+}
+
+void StatisticsWindow::setUser(const User &user)
+{
+    setThemeColor(user.getThemeColor());
+    totalCount = user.getTotalCount();
+    todayNum = user.getToday().dayOfWeek();
+    if(todayNum==0) todayNum = 7;
+
+    qDebug()<<todayNum;
+
+    int count[8] = {0};
+
+    for(TimerRecord re:user.getTimerRecord())
+    {
+        if(re.date.dayOfWeek()==0)
+        {
+            count[6] = re.count;
+        }
+        else
+        {
+            count[re.date.dayOfWeek()-1] = re.count;
+        }
+
+    }
+
+    count[todayNum-1] = user.getTodayCount();
+
+    setTimeCoord(count);
+
+
+    qDebug()<<user.getTimerRecord().size();
+
+
 }
 
 void StatisticsWindow::paintEvent(QPaintEvent *)
@@ -176,12 +207,6 @@ void StatisticsWindow::paintEvent(QPaintEvent *)
         painter.setPen(QColor(255,127,127));
     }
 
-    if(!userData->getServerDate().isNull()){
-        todayNum = userData->getServerDate().dayOfWeek();
-    }
-    else{
-        todayNum = 7;
-    }
     for(int i=0; i < todayNum-1; i++)
     {
         painter.drawLine(timeCoord[i],timeCoord[i+1]);
@@ -191,7 +216,7 @@ void StatisticsWindow::paintEvent(QPaintEvent *)
        painter.drawEllipse(timeCoord[i],3,3);
     }
 
-    int totalTime = userData->getTotalTime()/3600;
+    int totalTime = totalCount/3600;
     if(totalTime<10)
     {
         hourCount->setText(" "+QString::number(totalTime));

@@ -12,9 +12,8 @@ AddNoticeDialog::AddNoticeDialog(QDialog *parent) : QDialog(parent)
     this->setPalette(bgPalette);
     this->setAutoFillBackground(false);
 
-    http = DOHelper::getDOHelper();
-    userData = UserData::getUserData();
-    themeColor = userData->getThemeColor();
+
+    themeColor = 0;
 
     initLayout();
 }
@@ -90,7 +89,7 @@ void AddNoticeDialog::slotFinishBtn()
         else{
             QDate date;
             date = QDate(y,m,d);
-            http->addNoticeRequst(date.toString("yyyy-MM-dd"),content->toPlainText());
+//            http->addNoticeRequst(date.toString("yyyy-MM-dd"),content->toPlainText());
             this->close();
         }
     }

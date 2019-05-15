@@ -5,10 +5,9 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QTextEdit>
-#include "DOHelper.h"
-#include "UserData.h"
 #include "NoticeDialog.h"
 #include <QDebug>
+
 
 class NoticeWidget : public QWidget
 {
@@ -40,10 +39,6 @@ public:
     void showOldNotice();
     void showNewNotice();
     void changeDateBtnStyleSheet(int i);
-
-
-    UserData *userData;
-    DOHelper *http;
 
 private:
     void initLayout();

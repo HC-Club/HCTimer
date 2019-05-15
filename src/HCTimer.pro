@@ -20,9 +20,7 @@ SOURCES += main.cpp\
     TitleBar.cpp \
     TabBar.cpp \
     HomeWindow.cpp \
-    UserData.cpp \
     Monitor.cpp \
-    DOHelper.cpp \
     StatisticsWindow.cpp \
     NoticeWindow.cpp \
     InquiryWindow.cpp \
@@ -39,16 +37,17 @@ SOURCES += main.cpp\
     EditTaskDialog.cpp \
     SystemTrayIcon.cpp \
     InquirySpecificTimeDialog.cpp \
-    Updater.cpp
+    Updater.cpp \
+    myserver.cpp \
+    user.cpp \
+    tool.cpp
 
 HEADERS  += TimerWindow.h \
     DesktopWidget.h \
     TitleBar.h \
     TabBar.h \
     HomeWindow.h \
-    UserData.h \
     Monitor.h \
-    DOHelper.h \
     StatisticsWindow.h \
     NoticeWindow.h \
     InquiryWindow.h \
@@ -66,7 +65,10 @@ HEADERS  += TimerWindow.h \
     define.h \
     SystemTrayIcon.h \
     InquirySpecificTimeDialog.h \
-    Updater.h
+    Updater.h \
+    myserver.h \
+    user.h \
+    tool.h
 
 RESOURCES += \
     HCTimerRS.qrc

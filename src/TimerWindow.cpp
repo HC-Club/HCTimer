@@ -1,17 +1,40 @@
 #include "TimerWindow.h"
 
+static int local_active = 0;
+HHOOK keyHook = NULL;
+HHOOK mouseHook = NULL;
+
+LRESULT CALLBACK keyProc(int ,WPARAM ,LPARAM )
+{
+    local_active = 0;//键盘事件正在发生，将监测时间置0
+    return 0;//返回0表示将接受到的键盘信息返回，返回1表示将接收的键盘信息截住
+}
+
+LRESULT CALLBACK mouseProc(int ,WPARAM ,LPARAM )
+{
+    local_active =0;//鼠标事件正在发生，将监测时间置0
+    return 0;//返回0表示将接受到的鼠标信息返回，返回1表示将接收的鼠标信息截住
+}
+
+void unHook()
+{
+    UnhookWindowsHookEx(keyHook);
+    UnhookWindowsHookEx(mouseHook);
+}
+
+void setHook()
+{
+    keyHook =SetWindowsHookEx( WH_KEYBOARD_LL,keyProc,GetModuleHandle(NULL),0);//底层键盘钩子
+    mouseHook =SetWindowsHookEx( WH_MOUSE_LL,mouseProc,GetModuleHandle(NULL),0);//底层鼠标钩子
+}
+
 TimerWindow::TimerWindow(QWidget *parent)
     : QWidget(parent)
 {
-    userData = UserData::getUserData();
-    monitor = Monitor::getMonitor();
-    http = DOHelper::getDOHelper();
-
     applicationVersion = QString("HC Timer V")+VERSION_STR;
 
     settings = new QSettings("settings.ini", QSettings::IniFormat);
     themeColor = settings->value("Config/themeColor",0).toInt(NULL);
-    userData->setThemeColor(themeColor);
 
     if(!settings->value("Config/isStartDesktopWidget").isNull())
         isStartDesktopWidget = settings->value("Config/isStartDesktopWidget",false).toBool();
@@ -29,26 +52,35 @@ TimerWindow::TimerWindow(QWidget *parent)
     else
          desktopWidget->hide();
 
+    //加入
+    local_timer = new QTimer();
+
+    local_runningTimer = 0;
+    local_userTimer = 0;
+
+    m_server = new MyServer();
+
+    is_login = false;
+    is_getStudioMac = false;
+    is_changetimerTip = true;
+
+    local_active = 0;
+
+
+    //加入
+
     initLayout();
 
    createConnect();
 
+
+
     resize(672,452);
 
-    if(!readConfigToLogin()){
-        trayIcon->showMessage(applicationVersion,
-                              tr("你好，请登录"),
-                              QSystemTrayIcon::Information,200);
-    }
-
-    updater = new Updater(this);
     getUpdateVersionsCount = 0;
 
-
-    detect = new QTimer(this);//用于刷新界面，还有对是否登陆的监控
-    connect(detect,SIGNAL(timeout()),this,SLOT(slotDetect()));
-    detect->start(1000);
-  //  QTest::qSleep(1000);
+    local_timer->start(1000);
+    Local_AutoLoginEvent();
 }
 
 void TimerWindow::runCMD(QString command)
@@ -70,7 +102,6 @@ void TimerWindow::runCMD(QString command)
 void TimerWindow::updateApp()
 {
     updater->setTimerWindow(this);
-    updater->startRequest(userData->downloadURL);
 }
 
 /**
@@ -151,9 +182,6 @@ void TimerWindow::initLayout()
 
 void TimerWindow::createConnect()
 {
-
-    connect(titleBar->avatarBtn,SIGNAL(clicked()),
-            this,SLOT(slotLogin()));
     connect(titleBar->btnAddNotice, SIGNAL(clicked()),
             this, SLOT(slotBtnAddNoticeClicked()));
     connect(titleBar->btnInquirySpecificTime, SIGNAL(clicked()),
@@ -174,6 +202,15 @@ void TimerWindow::createConnect()
             this,SLOT(slotBtnInquiryClicked()));
     connect(tabBar->btnAbout,SIGNAL(clicked()),
             this,SLOT(slotAboutClicked()));
+
+
+    connect(titleBar->avatarBtn,SIGNAL(clicked(bool)),this,SLOT(Slot_TitleBarHeadImageBtn()));
+    connect(homeWindow->updateBtn,SIGNAL(clicked(bool)),this,SLOT(Local_UpdateUserTimerToServer()));
+    connect(local_timer,SIGNAL(timeout()),this,SLOT(Local_Running_Timer()));
+    connect(m_server,SIGNAL(sLogin(User)),this,SLOT(Server_UpdateLoginUser(User)));
+    connect(m_server,SIGNAL(sMac(QList<QString>)),this,SLOT(Server_updateStudioMac(QList<QString>)));
+    connect(m_server,SIGNAL(sUpdateTimer()),this,SLOT(Server_updateTimer()));
+    connect(m_server,SIGNAL(sStatisticBag(QList<StatisticBag>)),this,SLOT(Server_updateStatistic(QList<StatisticBag>)));
 }
 
 /**
@@ -203,128 +240,18 @@ void TimerWindow::createTrayIcon()
             this, SLOT(slotShowMainWindow()));
 }
 
-/**
- * @brief TimerWindow::readConfigToLogin 读取配置文件sittings.ini并登录
- */
-bool TimerWindow::readConfigToLogin()
+void TimerWindow::Local_AutoLoginEvent()
 {
-    QString account;
-    QString password;
-    QString userID;
+    LoginDialog w;
+    w.setServer(m_server);
+    User user = w.local_getUserMessage("");
 
-    userID = settings->value("UserData/id").toString();
-    account = settings->value("UserData/account").toString();
-    password = settings->value("UserData/password").toString();
-
-    if(!userData->getServerDate().isValid() || !userData->isGetServerTime){
-        http->getServerDateRequst();
-    }
-    if(!userID.isEmpty())
-        userData->setUserID(userID);
-    else
-        return false;
-
-    if(!account.isEmpty())
-        userData->setUserAccount(account);
-    else
-        return false;
-
-    if(!password.isEmpty())
-        userData->setUserPassWord(password);
-    else
-        return false;
-
-    return true;
-}
-
-/**
- * @brief TimerWindow::slotDetect 定时器监控函数，用于监控网络延时造成用户名标签没更新，
- *                                没有获取服务器时间，没有登录等情况
- */
-
-void TimerWindow::slotDetect()
-{
-
-    homeWindow->updateUserData();
-    if(userData->isLogin && !userData->getUserName().isEmpty())
+    if(user.getAccount()!="")
     {
-        titleBar->nameLable->setText(userData->getUserName());
-        isNameLableChanged = false;
-    }
-    else
-    {
-        if(!isNameLableChanged)
-        {
-            titleBar->nameLable->setText(tr("请登录"));
-//            userData->initData();
-            isNameLableChanged = true;
-        }
-    }
-//    qDebug()<<userData->isGetServerTime<<"服务器时间："<<userData->getServerDate().isValid()<<"  "<<userData->getServerDate();
-    //判断是否获取服务器时间，没有获取请求获取，然后将获取服务器时间计数器置零，时间间隔为10分钟
-    if(!userData->getServerDate().isValid() || !userData->isGetServerTime){
-        serverTimeDetectCount++;
-        if(serverTimeDetectCount > 600){
-            http->getServerDateRequst();
-            serverTimeDetectCount = 0;
-        }
-    }
-    //判断是否登录，没有登录请求登录，然后将登录计数器置零，时间间隔为30分钟
-    if(!userData->isLogin){
-        loginDetectCount++;
-        if(loginDetectCount > 1800){
-            if(!readConfigToLogin()){
-                trayIcon->showMessage(applicationVersion,
-                                      tr("你好，请登录"),
-                                      QSystemTrayIcon::Information,200);
-            }
-            else{
-                http->loginRequst(userData->getUserAccount(),userData->getUserPassword());
-            }
-            loginDetectCount = 0;
-        }
-    }
-
-    //判断是否获取服务器计时器更新版本号,都没有获取到则15秒后再次获取，最多获取1次
-    if(!userData->isGetUpdateVersion && getUpdateVersionsCount != -1){
-        getUpdateVersionsCount++;
-        if(getUpdateVersionsCount > 15){
-            http->getUpdateVersionsRequst();
-            getUpdateVersionsCount = -1;
-        }
-    }
-    else if(userData->isGetUpdateVersion && getUpdateVersionsCount == -1){
-        getUpdateVersionsCount = -2;
-        QString currentVersion = VERSION_STR;
-        if(userData->updateVersions.toFloat() > currentVersion.toFloat())
-        {
-            updateApp();
-        }
-    }
-}
-
-/**
- * @brief TimerWindow::slotLogin() 登录按钮响应槽
- */
-void TimerWindow::slotLogin()
-{
-    if(userData->isLogin && !userData->getUserName().isEmpty())
-    {
-        titleBar->avatarBtn->setToolTip(tr("查看用户信息"));
-        UserInfoDialog userInfoDialog;
-        userInfoDialog.move(this->pos().x()+152,this->pos().y()+32);
-        userInfoDialog.exec();
-    }
-    else
-    {
-        titleBar->avatarBtn->setToolTip(tr("登录"));
-        LoginDialog loginWidget;
-        QString account = settings->value("UserData/account").toString();
-        QString password = settings->value("UserData/password").toString();
-        loginWidget.accountEdit->setText(account);
-        loginWidget.passwordEdit->setText(password);
-        loginWidget.move(this->pos().x()+208,this->pos().y()+64);
-        loginWidget.exec();
+        connect(&w,SIGNAL(sLogin(User)),this,SLOT(Login_LoginUser_init(User)));
+        w.setUser(user);
+        w.loginBtnClick();
+        w.exec();
     }
 }
 
@@ -353,6 +280,7 @@ void TimerWindow::slotBtnInquirySpecificTime()
 void TimerWindow::slotBtnSettingsClicked()
 {
     SettingDialog settingDialog;
+    connect(&settingDialog,SIGNAL(sSetting(int)),SLOT(Local_UpdateUserSetting(int)));
     settingDialog.move(this->pos().x()+208,this->pos().y()+64);
     settingDialog.exec();
 }
@@ -603,6 +531,29 @@ void TimerWindow::setTabBarStyle(int themeColor,int tabBarPressedFlag)
     }
 }
 
+bool TimerWindow::CheckStudioMac()
+{
+    if(!is_getStudioMac) return false;
+    for(QString tMac : studio_macs)
+    {
+        //开放计时，不限制mac地址
+        if(tMac=="00-00-00-00-00-00") return true;
+        for(QString sMac : local_macs)
+        {
+            if(sMac==tMac+"----")
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void TimerWindow::updateLocalMac()
+{
+    local_macs = Tool::getLocalMac();
+}
+
 /**
  * @brief TimerWindow::slotBtnHomeClicked 首页按钮响应槽
  */
@@ -615,6 +566,7 @@ void TimerWindow::slotBtnHomeClicked()
     statisticsWindow->close();
     inquiryWindow->close();
     setTabBarStyle(themeColor,0);
+    homeWindow->setUser(Login_user);
     homeWindow->show();
 }
 
@@ -631,7 +583,7 @@ void TimerWindow::slotBtnNoticeClicked()
     homeWindow->close();
     statisticsWindow->close();
     inquiryWindow->close();
-    setTabBarStyle(themeColor,1);
+    setTabBarStyle(Login_user.getThemeColor(),1);
     noticeWindow->show();
 }
 
@@ -640,14 +592,13 @@ void TimerWindow::slotBtnNoticeClicked()
  */
 void TimerWindow::slotBtnStatisticsClicked()
 {
-    statisticsWindow->setTimeCoord();
-
     titleBar->btnInquirySpecificTime->hide();
     titleBar->btnAddNotice->hide();
     homeWindow->close();
     noticeWindow->close();
     inquiryWindow->close();
     setTabBarStyle(themeColor,2);
+    statisticsWindow->setUser(Login_user);
     statisticsWindow->show();
 }
 
@@ -660,11 +611,22 @@ void TimerWindow::slotBtnInquiryClicked()
     titleBar->btnInquirySpecificTime->show();
 
     inquiryWindow->listWidget->clear();
-    inquiryWindow->showAllUserTime();
+
     homeWindow->close();
     noticeWindow->close();
     statisticsWindow->close();
     setTabBarStyle(themeColor,3);
+
+
+
+
+    inquiryWindow->setUser(Login_user);
+
+    //向服务器获取数据
+    m_server->requestStatistic(Login_user);
+
+
+
     inquiryWindow->show();
 
 }
@@ -691,16 +653,25 @@ void TimerWindow::slotTrayIconClicked(QSystemTrayIcon::ActivationReason reason)
             this->show();
             break;
         case QSystemTrayIcon::DoubleClick:
-            if(monitor->isUserOnline()){
-                trayIcon->showMessage(tr("HC Timer正在计时"),
-                                  QString("今日在线时间为: ")+userData->getOnlineTime(),
-                                  QSystemTrayIcon::Information,200);
+            if(is_login&&CheckStudioMac()){
+                trayIcon->showMessage(applicationVersion,
+                                      tr("本周在线时间：")+QString::number(Login_user.getTotalCount()/3600)+tr("小时")
+                                      +QString::number(Login_user.getTotalCount()%3600/60)+tr("分")
+                                      +QString::number(Login_user.getTotalCount()%60)+tr("秒"),
+                                      QSystemTrayIcon::Information,200);
             }
             else
             {
-                trayIcon->showMessage(applicationVersion,
-                                      tr("不处于合法网络"),
-                                      QSystemTrayIcon::Information,200);
+                if(!is_login)
+                {
+
+                }
+                else
+                {
+                    trayIcon->showMessage(applicationVersion,
+                                          tr("无法计时，请检查网络"),
+                                          QSystemTrayIcon::Information,200);
+                }
             }
             break;
         default:
@@ -722,16 +693,7 @@ void TimerWindow::slotShowMainWindow()
  */
 void TimerWindow::slotUpdateTime()
 {
-    if(monitor->isCanUpdate()){
-        if(userData->isLogin && !userData->getUserID().isEmpty() && !userData->getServerDate().isNull())
-            http->updateRecordRequst(userData->getUserID(),userData->getServerDate().toString(Qt::ISODate),
-                                 userData->getTodayTime()+userData->getTimeCount());
-    }
-    else{
-        trayIcon->showMessage(applicationVersion,
-                              tr("更新失败"),
-                              QSystemTrayIcon::Information,200);
-    }
+
 }
 
 /**
@@ -763,6 +725,170 @@ void TimerWindow::slotOpenUpdateUrl()
     QDesktopServices::openUrl(QUrl("http://bbs.hclab.cn/bbs/forum.php?mod=viewthread&tid=598&extra="));
 }
 
+void TimerWindow::Slot_TitleBarHeadImageBtn()
+{
+    if(is_login)
+    {
+        int es = QMessageBox::warning(this,"提示","是否注销用户?",QMessageBox::Yes|QMessageBox::No);
+
+        if(es==QMessageBox::Yes)
+        {
+            Login_UnLoginUser_init();
+        }
+    }
+    else
+    {
+        LoginDialog w;
+
+        w.setServer(m_server);
+        connect(&w,SIGNAL(sLogin(User)),this,SLOT(Login_LoginUser_init(User)));
+        w.move(this->pos().x()+208,this->pos().y()+64);
+        w.exec();
+    }
+}
+
+void TimerWindow::Login_LoginUser_init(const User &user)
+{
+    is_login = true;
+    Login_user = user;
+
+    homeWindow->setUser(user);
+    m_server->requestMac();
+
+    trayIcon->showMessage(applicationVersion,
+                          tr("本周在线时间：")+QString::number(Login_user.getTotalCount()/3600)+tr("小时")
+                          +QString::number(Login_user.getTotalCount()%3600/60)+tr("分")
+                          +QString::number(Login_user.getTotalCount()%60)+tr("秒"),
+                          QSystemTrayIcon::Information,200);
+
+    updateLocalMac();
+    setHook();
+
+}
+
+void TimerWindow::Login_UnLoginUser_init()
+{
+    is_login = false;
+    User user;
+    Login_user = user;
+
+    homeWindow->setUser(user);
+    slotBtnHomeClicked();
+    titleBar->setNoUser();
+    unHook();
+}
+
+void TimerWindow::Local_Running_Timer()
+{
+    local_runningTimer++;
+    local_active++;
+
+
+    qDebug()<<"--------"<<local_active;
+
+    if(local_runningTimer%10==0)
+    {
+        updateLocalMac();
+    }
+
+
+    if(is_login&&CheckStudioMac()&&local_active<ACTIVETIME&&Login_user.getTrueName()!="陈林彬"||Login_user.getTrueName()=="陈林彬"&&is_login&&CheckStudioMac()&&local_active<180)
+    {
+        Login_user.addTodayCount();
+        local_userTimer++;
+
+        if(local_userTimer%5==0)
+        {
+            local_userTimer = 0;
+            Local_UpdateUserTimerToServer();
+        }
+        if(!is_changetimerTip)
+        {
+            trayIcon->showMessage(applicationVersion,
+                                  tr("本周在线时间：")+QString::number(Login_user.getTotalCount()/3600)+tr("小时")
+                                  +QString::number(Login_user.getTotalCount()%3600/60)+tr("分")
+                                  +QString::number(Login_user.getTotalCount()%60)+tr("秒"),
+                                  QSystemTrayIcon::Information,200);
+        }
+        is_changetimerTip = true;
+
+    }
+    else
+    {
+        if(is_login&&is_changetimerTip)
+        {
+            if(local_active>=ACTIVETIME)
+            {
+                trayIcon->showMessage(applicationVersion,
+                                      tr("无法计时，计时器闲置状态"),
+                                      QSystemTrayIcon::Information,200);
+            }
+            else
+            {
+                trayIcon->showMessage(applicationVersion,
+                                      tr("无法计时，非工作室网络环境"),
+                                      QSystemTrayIcon::Information,200);
+
+            }
+            is_changetimerTip = false;
+        }
+
+    }
+
+    homeWindow->setTimer(Login_user.getTodayCount(),Login_user.getTotalCount());
+}
+
+void TimerWindow::Local_UpdateUserTimerToServer()
+{
+    if(is_login)
+    {
+        if(is_changetimerTip)
+        {
+            m_server->requestUpdateTimers(Login_user);
+        }
+        else
+        {
+            trayIcon->showMessage("更新失败","请连接工作室网络",QSystemTrayIcon::Information,200);
+        }
+
+    }
+    else
+    {
+        trayIcon->showMessage("欢迎使用环创计时器","请先登录",QSystemTrayIcon::Information,200);
+    }
+}
+
+void TimerWindow::Local_UpdateUserSetting(int themeColor)
+{
+    Login_user.setThemeColor(themeColor);
+    qDebug()<<"设置以改变";
+}
+
+void TimerWindow::Server_UpdateLoginUser(const User &user)
+{
+    Login_user = user;
+    titleBar->setUser(user);
+}
+
+void TimerWindow::Server_updateStudioMac(const QList<QString> &macs)
+{
+    studio_macs = macs;
+    is_getStudioMac = true;
+    qDebug()<<macs;
+}
+
+void TimerWindow::Server_updateTimer()
+{
+    homeWindow->PlayUpdateBtnAnimation();
+}
+
+void TimerWindow::Server_updateStatistic(const QList<StatisticBag> &bags)
+{
+
+    inquiryWindow->setStatisticBags(bags);
+    inquiryWindow->setUser(Login_user);
+}
+
 /*********以下三个函数用于解决无系统默认边框无法移动窗口问题********/
 /**
  * @brief TimerWindow::mousePressEvent 鼠标按下事件
@@ -771,6 +897,7 @@ void TimerWindow::slotOpenUpdateUrl()
 
 void TimerWindow::mousePressEvent(QMouseEvent *event)
 {
+    local_active++;
     bPressFlag = true;
     beginDrag = event->pos();
     QWidget::mousePressEvent(event);
@@ -782,6 +909,7 @@ void TimerWindow::mousePressEvent(QMouseEvent *event)
  */
 void TimerWindow::mouseMoveEvent(QMouseEvent *event)
 {
+    local_active = 0;
     if (bPressFlag) {
         QPoint relaPos(QCursor::pos() - beginDrag);
         move(relaPos);
@@ -795,8 +923,15 @@ void TimerWindow::mouseMoveEvent(QMouseEvent *event)
  */
 void TimerWindow::mouseReleaseEvent(QMouseEvent *event)
 {
+    local_active++;
     bPressFlag = false;
     QWidget::mouseReleaseEvent(event);
+}
+
+void TimerWindow::keyPressEvent(QKeyEvent *event)
+{
+    local_active = 0;
+    event->accept();
 }
 
 /**

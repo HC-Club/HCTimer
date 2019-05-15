@@ -13,8 +13,6 @@
 #include <QtMath>
 #include "ModifyInfoDialog.h"
 #include <QDebug>
-#include "DOHelper.h"
-#include "UserData.h"
 #include <QFileDialog>
 #include <QSettings>
 
@@ -45,8 +43,6 @@ protected:
     QPoint beginDrag;
     bool bPressFlag;
     void initLayout();
-    UserData *userData;
-    DOHelper *http;
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);

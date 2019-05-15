@@ -12,10 +12,9 @@
 #include <QMessageBox>
 #include <QListWidget>
 #include <QListWidgetItem>
-#include "UserData.h"
-#include "DOHelper.h"
 #include <QLineEdit>
 #include <QDebug>
+#include "user.h"
 
 class InquirySpecificTimeDialog : public QDialog
 {
@@ -24,8 +23,6 @@ public:
     explicit InquirySpecificTimeDialog(QDialog *parent = 0);
 
     void showListResult();
-    UserData *userData;
-    DOHelper *http;
 
 protected:
     void initInterface();

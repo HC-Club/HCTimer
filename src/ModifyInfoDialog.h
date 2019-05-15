@@ -10,8 +10,6 @@
 #include <QPushButton>
 #include <QListView>
 #include <QDebug>
-#include "DOHelper.h"
-#include "UserData.h"
 #include <QDialog>
 #include <QLineEdit>
 #include <QMouseEvent>
@@ -23,8 +21,6 @@
 #include <QMessageBox>
 #include <QtMath>
 #include <QPainter>
-#include "DOHelper.h"
-#include "UserData.h"
 
 class ModifyInfoDialog : public QDialog
 {
@@ -49,8 +45,6 @@ protected:
     QPoint beginDrag;
     bool bPressFlag;
     void initLayout();
-    DOHelper *http;
-    UserData *userData;
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);

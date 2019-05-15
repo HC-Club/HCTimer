@@ -137,7 +137,6 @@ void DWSettingDialog::slotCloseBtn()
         settings->setValue("TomatoConfig/longRestTime",longRestTimeSlider->value());
         settings->setValue("TomatoConfig/volume",volumeSlider->value());
         settings->setValue("TomatoConfig/isStartWorkSound",isStartWorkSound);
-        QMessageBox::about(this,"温馨提示","您的设置信息已保存，将在下次启动应用程序时生效！");
     }
     this->hide();
 }

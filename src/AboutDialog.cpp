@@ -32,6 +32,8 @@ void AboutDialog::initInterface()
                                    "<li><b>客户端部分：</b>陈潼升 张晓煌"
                                    "<li><b>服务端部分：</b>邹锋"
                                    "<li><b>UI设计部分：</b>刘毓奔<br/>"
+                                   "<li><b>1.4版本：</b>林伟城，何家良<br/>"
+                                   "<li><b>2.0版本：</b>杨容光<br/>"
                                    "</ul>"
                                    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其他："
                                    "<ul>"

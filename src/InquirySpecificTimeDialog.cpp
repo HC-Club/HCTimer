@@ -2,8 +2,6 @@
 
 InquirySpecificTimeDialog::InquirySpecificTimeDialog(QDialog *parent) : QDialog(parent)
 {
-    userData = UserData::getUserData();
-    http = DOHelper::getDOHelper();
 
     resize(392,342);
 
@@ -17,7 +15,7 @@ InquirySpecificTimeDialog::InquirySpecificTimeDialog(QDialog *parent) : QDialog(
     this->setPalette(bgPalette);
     this->setAutoFillBackground(true);
 
-    themeColor = userData->getThemeColor();
+    themeColor = 0;
 
     initInterface();
 }
@@ -95,19 +93,19 @@ void InquirySpecificTimeDialog::initInterface()
             "QPushButton:pressed{background-color:#87CEFA;}");
     connect(searchBtn,SIGNAL(clicked()),this,SLOT(slotSearchBtn()));
 
-    if(!userData->getServerDate().isNull())
-    {
-        QDate tempDate;
-        tempDate = userData->getServerDate().addDays(-6-userData->getServerDate().dayOfWeek());
-        startYear->setText(QString::number(tempDate.year()));
-        startMonth->setText(QString::number(tempDate.month()));
-        startDay->setText(QString::number(tempDate.day()));
+//    if(!userData->getServerDate().isNull())
+//    {
+//        QDate tempDate;
+//        tempDate = userData->getServerDate().addDays(-6-userData->getServerDate().dayOfWeek());
+//        startYear->setText(QString::number(tempDate.year()));
+//        startMonth->setText(QString::number(tempDate.month()));
+//        startDay->setText(QString::number(tempDate.day()));
 
-        tempDate = userData->getServerDate().addDays(7-userData->getServerDate().dayOfWeek());
-        endYear->setText(QString::number(tempDate.year()));
-        endMonth->setText(QString::number(tempDate.month()));
-        endDay->setText(QString::number(tempDate.day()));
-    }
+//        tempDate = userData->getServerDate().addDays(7-userData->getServerDate().dayOfWeek());
+//        endYear->setText(QString::number(tempDate.year()));
+//        endMonth->setText(QString::number(tempDate.month()));
+//        endDay->setText(QString::number(tempDate.day()));
+//    }
 }
 
 void InquirySpecificTimeDialog::showListResult(QString startDate,QString endDate)
@@ -118,12 +116,9 @@ void InquirySpecificTimeDialog::showListResult(QString startDate,QString endDate
 
     listWidget->clear();
 
-    if(!startDate.isNull() && !endDate.isNull())
-        http->getAllSpecificUserTimesRequst(startDate,endDate);
-    else
-        return;
 
-    QList<AllUsers> temp = userData->getAllSpecificUsers();
+
+    QList<StatisticBag> temp ;
 
     if(temp.isEmpty())
         return;
@@ -155,7 +150,6 @@ void InquirySpecificTimeDialog::showListResult(QString startDate,QString endDate
 
         listWidget->addItem(userTimeItem);
     }
-    userData->clearAllSpecificUsers();
 }
 
 void InquirySpecificTimeDialog::slotSearchBtn()

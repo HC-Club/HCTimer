@@ -3,22 +3,18 @@
 
 #include <QWidget>
 #include <QLabel>
-#include "UserData.h"
-#include "DOHelper.h"
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QPropertyAnimation>
-
+#include <QDebug>
+#include "tool.h"
 class InquiryWindow : public QWidget
 {
     Q_OBJECT
 public:
     explicit InquiryWindow(QWidget *parent = 0);
     void initLayout();
-    void showAllUserTime();
 
-    UserData *userData;
-    DOHelper *http;
 
     QLabel *weekCount;
     QLabel *timeQualified;
@@ -27,8 +23,18 @@ public:
     QListWidgetItem* listItem;
 
     QString isQualified;
+    QLabel *text1 ;
+    QLabel *text2 ;
+    QLabel *text3 ;
+    QPalette pa;
 
     int themeColor;
+
+    void setStatisticBags(const QList<StatisticBag> &list);
+    void setUser(const User &user);
+private:
+
+    void setThemeColor(const int &_themeColor);
 
 signals:
 

@@ -10,10 +10,8 @@
 #include <QPoint>
 #include <QGraphicsOpacityEffect>
 #include <QDebug>
-#include <DOHelper.h>
-#include "UserData.h"
-#include "DOHelper.h"
 #include "Monitor.h"
+#include "user.h"
 
 #define AUTO_UPDATE_INTERVAL 300    //5min*60sec
 #define HOURS_WEEK 86400    //24hour*60min*60sec
@@ -22,25 +20,38 @@ class HomeWindow : public QWidget
 {
     Q_OBJECT
 public:
-    void updateUserData();
+
     explicit HomeWindow(QWidget *parent = 0);
     ~HomeWindow();
 
+    void setUser(const User &user);
+    void setDates(const QDate &today,const QDate &begin,const QDate &end);
+    void setTimer(int today,int total);
+
+    QPushButton *updateBtn;
+
+    /**
+     * @brief 设置首页播放更新动画
+     */
+    void PlayUpdateBtnAnimation();
+
+public slots:
+    /**
+     * @brief 首页时间槽执行更新动画
+     */
+    void DoUpdateBtnAnimation();
+
 protected:
-    void setUserValue(int _totalTime,int _todayTime);
     void paintEvent(QPaintEvent *event);
 
 private:
     void createView();
-    void setDate();
 
     int totalTimeVaule;
     int hour;
     int minute;
     int second;
     int autoUpdate;
-
-    QPushButton *updateBtn;
 
     QLabel *todayLable;
     QLabel *date;
@@ -63,12 +74,6 @@ private:
     QLabel *triLabel;
     QLabel *addOne;
 
-    UserData *userData;
-    DOHelper *http;
-    Monitor *monitor;
-
-  //  QTimer *updateTimer;
- //   QTimer *timer;
     QTimer *timerOpacity;
 
     int level;
@@ -78,9 +83,7 @@ private:
                          ,QPoint(596,185),QPoint(595,180)};
     int themeColor;
 
-private slots:
-    void updateBtnAnimation();
-    void slotUpdateBtn();
+    void setThemeColor(const int &_themeColor);
 
 };
 

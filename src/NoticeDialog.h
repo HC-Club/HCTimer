@@ -8,16 +8,13 @@
 #include <QtMath>
 #include <QPainter>
 #include <QMessageBox>
-#include "UserData.h"
-#include "DOHelper.h"
+#include "user.h"
 
 class NoticeDialog : public QDialog
 {
     Q_OBJECT
 public:
     explicit NoticeDialog(QDialog *parent = 0);
-    UserData *userData;
-    DOHelper *http;
     QPushButton *closeBtn;
     QLabel *date;
     QLabel *content;

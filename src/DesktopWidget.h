@@ -20,8 +20,6 @@
 #include <QMediaPlaylist>
 #include <QSound>
 #include "DWSettingDialog.h"
-#include "UserData.h"
-#include "DOHelper.h"
 #include "Monitor.h"
 #include <qdebug.h>
 #include <QDir>
@@ -55,9 +53,6 @@ private:
 
     QPoint beginDrag;
     bool bPressFlag;
-
-    UserData *userData;
-    DOHelper *http;
     Monitor *monitor;
 
     QSettings *settings;

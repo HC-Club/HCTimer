@@ -10,16 +10,12 @@
 #include <QMessageBox>
 #include <QtMath>
 #include <QPainter>
-#include "DOHelper.h"
-#include "UserData.h"
 
 class AddNoticeDialog : public QDialog
 {
     Q_OBJECT
 public:
     explicit AddNoticeDialog(QDialog *parent = 0);
-    DOHelper *http;
-    UserData *userData;
 
 protected:
     void initLayout();

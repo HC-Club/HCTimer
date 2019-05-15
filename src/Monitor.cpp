@@ -3,32 +3,32 @@
 static int inactiveTime = 0;//记录鼠标键盘不活动时间
 
 #if WINDOWS_VERSION
-    HHOOK keyHook = NULL;
-    HHOOK mouseHook = NULL;
+//    HHOOK keyHook = NULL;
+//    HHOOK mouseHook = NULL;
 
-LRESULT CALLBACK keyProc(int ,WPARAM ,LPARAM )
-{
-    inactiveTime = 0;//键盘事件正在发生，将监测时间置0
-    return 0;//返回0表示将接受到的键盘信息返回，返回1表示将接收的键盘信息截住
-}
+//LRESULT CALLBACK keyProc(int ,WPARAM ,LPARAM )
+//{
+//    inactiveTime = 0;//键盘事件正在发生，将监测时间置0
+//    return 0;//返回0表示将接受到的键盘信息返回，返回1表示将接收的键盘信息截住
+//}
 
-LRESULT CALLBACK mouseProc(int ,WPARAM ,LPARAM )
-{
-    inactiveTime =0;//鼠标事件正在发生，将监测时间置0
-    return 0;//返回0表示将接受到的鼠标信息返回，返回1表示将接收的鼠标信息截住
-}
+//LRESULT CALLBACK mouseProc(int ,WPARAM ,LPARAM )
+//{
+//    inactiveTime =0;//鼠标事件正在发生，将监测时间置0
+//    return 0;//返回0表示将接受到的鼠标信息返回，返回1表示将接收的鼠标信息截住
+//}
 
-void unHook()
-{
-    UnhookWindowsHookEx(keyHook);
-    UnhookWindowsHookEx(mouseHook);
-}
+//void unHook()
+//{
+//    UnhookWindowsHookEx(keyHook);
+//    UnhookWindowsHookEx(mouseHook);
+//}
 
-void setHook()
-{
-    keyHook =SetWindowsHookEx( WH_KEYBOARD_LL,keyProc,GetModuleHandle(NULL),0);//底层键盘钩子
-    mouseHook =SetWindowsHookEx( WH_MOUSE_LL,mouseProc,GetModuleHandle(NULL),0);//底层鼠标钩子
-}
+//void setHook()
+//{
+//    keyHook =SetWindowsHookEx( WH_KEYBOARD_LL,keyProc,GetModuleHandle(NULL),0);//底层键盘钩子
+//    mouseHook =SetWindowsHookEx( WH_MOUSE_LL,mouseProc,GetModuleHandle(NULL),0);//底层鼠标钩子
+//}
 
 #elif LINUX_VERSION
 
@@ -66,7 +66,7 @@ Monitor *Monitor::getMonitor()
 Monitor::Monitor(QObject *)
 {
 #if WINDOWS_VERSION
-    setHook();//新建钩子
+//    setHook();//新建钩子
 #elif LINUX_VERSION
 
 #elif MAC_VERSION
@@ -82,7 +82,7 @@ Monitor::Monitor(QObject *)
 Monitor::~Monitor()
 {
 #if WINDOWS_VERSION
-    unHook();//删除钩子
+//    unHook();//删除钩子
 #elif LINUX_VERSION
 
 #elif MAC_VERSION
@@ -202,15 +202,7 @@ bool Monitor::isLabRouter()
 void Monitor::upDateTime()
 {
 #if WINDOWS_VERSION
-    if(isUserOnline() && isLabRouterMAC){
-        inactiveTime++;
-        if(inactiveTime>LIMIT_TIME){
-            return;
-        }
-        else{
-            userData->setTimeCount(userData->getTimeCount()+1);
-        }
-    }
+
 #elif LINUX_VERSION
     if(isUserOnline() && isLabRouterMAC){
         inactiveTime = 0;

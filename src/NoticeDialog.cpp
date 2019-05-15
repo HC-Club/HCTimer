@@ -3,8 +3,6 @@
 NoticeDialog::NoticeDialog(QDialog *parent) : QDialog(parent)
 {
     resize(372,388);
-    userData = UserData::getUserData();
-    http = DOHelper::getDOHelper();
     bPressFlag = false;
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground);
@@ -70,12 +68,7 @@ void NoticeDialog::initLayout()
 
 void NoticeDialog::deleteNotice()
 {
-    if(!noticeID->text().isEmpty()){
-        http->delNoticeRequst(noticeID->text());
-        this->close();
-    }
-    else
-        QMessageBox::about(this, "提示", "此公告为空，无法删除！");
+    QMessageBox::information(this,"提示","该功能已被删除");
 }
 
 void NoticeDialog::mousePressEvent(QMouseEvent *event)

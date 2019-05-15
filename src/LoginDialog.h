@@ -8,9 +8,12 @@
 #include <QMessageBox>
 #include <QtMath>
 #include <QPainter>
-#include "DOHelper.h"
-#include "UserData.h"
+#include <QCheckBox>
 #include "RegistDialog.h"
+#include "myserver.h"
+#define HCKEY "qwertyuiopasdfghjklzxcvbnm789456"
+#define HCIVEC = "123456789zxcvbnm"
+#define FILENAME "LOCALDATABASE.dat"
 
 class LoginDialog : public QDialog
 {
@@ -24,11 +27,28 @@ public:
     QPushButton *closeBtn;
     QPushButton *loginBtn;
     QPushButton *registBtn;
+    QCheckBox *rememberPasswordBtn;
+    QCheckBox *autoLoginBtn;
 
-    DOHelper *http;
-    UserData *userData;
+    MyServer *m_server;
 
     void initInterface();
+
+
+    void setServer(MyServer *server);
+    void setUser(const User &user);
+    /**
+     * @brief 保存用户数据于本地
+     * @param user
+     */
+    void local_saveUserMessage(const User &user);
+    /**
+     * @brief 从本地读取出用户数据
+     * @param userName
+     * @return
+     */
+    User local_getUserMessage(const QString &userName);
+
 
 protected:
 
@@ -38,14 +58,28 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void paintEvent(QPaintEvent *);
+    void keyPressEvent(QKeyEvent *event);
+
+    void CreateLocalDatabase();
+    QList<User> getAllUserMessageFromLocal();
+    void SaveAllUserMessageFromLocal(const QList<User> &list);
 
 
 private:
     int themeColor;
 
+    QString enCode(const QString &str);
+    QString deCode(const QString &str);
+
 public slots:
     void loginBtnClick();
     void registBtnClick();
+    void Server_LoginSuccess(const User &user);
+    void Server_LoginFail(const QString &message);
+    void Local_AccountTextChange(const QString&text);
+
+signals:
+    void sLogin(const User &user);
 
 };
 

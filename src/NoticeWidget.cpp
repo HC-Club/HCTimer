@@ -2,8 +2,6 @@
 
 NoticeWidget::NoticeWidget(QWidget *parent) : QWidget(parent)
 {
-    userData = UserData::getUserData();
-    http = DOHelper::getDOHelper();
     dateBtnStyleSheetID = 0;
     initLayout();
     resize(652,300);
@@ -124,8 +122,7 @@ void NoticeWidget::initLayout()
 
 void NoticeWidget::showCurrentNotice()
 {
-    http->getNoticeRequst();
-    QList<Notice> temp = userData->getNotices();
+    QList<Notice> temp;
     int length = temp.length();
     if(length-- > 0){
         noticeIDLabel_1->setText(temp.at(0).id);
@@ -180,18 +177,11 @@ void NoticeWidget::showCurrentNotice()
     if(dateBtnStyleSheetID>3)
         dateBtnStyleSheetID=0;
     changeDateBtnStyleSheet(dateBtnStyleSheetID++);
-    userData->clearNotices();
 }
 
 void NoticeWidget::showNewNotice()
 {
-
-    if(!userData->getEndNoticeID().isEmpty())
-        http->refreshGetNoticeRequst("2",userData->getEndNoticeID());
-    else
-        return;
-    qDebug()<<"末id："<<userData->getEndNoticeID();
-    QList<Notice> temp = userData->getNotices();
+    QList<Notice> temp;
     int length = temp.length();
     if(length-- > 0){
         noticeIDLabel_1->setText(temp.at(0).id);
@@ -246,17 +236,11 @@ void NoticeWidget::showNewNotice()
     if(dateBtnStyleSheetID>3)
         dateBtnStyleSheetID=0;
     changeDateBtnStyleSheet(dateBtnStyleSheetID++);
-    userData->clearNotices();
 }
 
 void NoticeWidget::showOldNotice()
 {
-    if(!userData->getFirstNoticeID().isEmpty())
-        http->refreshGetNoticeRequst("1",userData->getFirstNoticeID());
-    else
-        return;
-    qDebug()<<"首id："<<userData->getFirstNoticeID();
-    QList<Notice> temp = userData->getNotices();
+    QList<Notice> temp;
     int length = temp.length();
     if(length-- > 0){
         noticeIDLabel_1->setText(temp.at(0).id);
@@ -311,7 +295,6 @@ void NoticeWidget::showOldNotice()
     if(dateBtnStyleSheetID>3)
         dateBtnStyleSheetID=0;
     changeDateBtnStyleSheet(dateBtnStyleSheetID++);
-    userData->clearNotices();
 }
 
 void NoticeWidget::changeDateBtnStyleSheet(int i)

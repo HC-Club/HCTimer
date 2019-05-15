@@ -5,8 +5,6 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QPropertyAnimation>
-#include "DOHelper.h"
-#include "UserData.h"
 #include "NoticeWidget.h"
 #include "NoticeDialog.h"
 #include <QDebug>

@@ -5,8 +5,6 @@ TitleBar::TitleBar(QWidget *parent)
 {
     resize(652,64);
 
-    userData = UserData::getUserData();
-
     //设置背景
     QPalette bgPalette;
     bgPalette.setColor(QPalette::Background, QColor(230,230,230));
@@ -14,6 +12,16 @@ TitleBar::TitleBar(QWidget *parent)
     this->setAutoFillBackground(true);
 
     initLayout();
+}
+
+void TitleBar::setUser(const User &user)
+{
+    nameLable->setText(user.getTrueName());
+}
+
+void TitleBar::setNoUser()
+{
+    nameLable->setText("请登录");
 }
 
 /**

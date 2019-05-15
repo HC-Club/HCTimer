@@ -11,24 +11,14 @@ HomeWindow::HomeWindow(QWidget *parent) : QWidget(parent)
 
     level = 0;
 
-    userData = UserData::getUserData();
-    http = DOHelper::getDOHelper();
-    monitor = Monitor::getMonitor();
-
-    themeColor = userData->getThemeColor();
-
-    setUserValue(userData->getTotalTime(),userData->getTodayTime());
+    themeColor = 0;
 
     createView();
 
     titleLable->adjustSize();
 
-//    timer = new QTimer(this);
-//    connect(timer,SIGNAL(timeout()),this,SLOT(upDateUserData()));
-//    timer->start(1000);//每秒一次
-
     timerOpacity = new QTimer(this);
-    connect(timerOpacity,SIGNAL(timeout()),this,SLOT(updateBtnAnimation()));
+    connect(timerOpacity,SIGNAL(timeout()),this,SLOT(DoUpdateBtnAnimation()));
 
     showhour->setText(QString::number(hour));
     showminute->setText(QString::number(minute));
@@ -37,6 +27,7 @@ HomeWindow::HomeWindow(QWidget *parent) : QWidget(parent)
     showhour->adjustSize();
     showminute->adjustSize();
     showsecond->adjustSize();
+    setTimer(0,0);
 }
 
 HomeWindow::~HomeWindow()
@@ -44,12 +35,123 @@ HomeWindow::~HomeWindow()
 
 }
 
-void HomeWindow::setUserValue(int _totalTime, int _todayTime)
+void HomeWindow::setUser(const User &user)
 {
-    totalTimeVaule = _totalTime*200/HOURS_WEEK;
-    hour=_todayTime/3600;
-    minute=_todayTime%3600/60;
-    second=_todayTime%60;
+    setTimer(user.getTodayCount(),user.getTotalCount());
+
+    setDates(user.getToday(),user.getBegin(),user.getEnd());
+    setThemeColor(user.getThemeColor());
+}
+
+void HomeWindow::setDates(const QDate &today, const QDate &begin, const QDate &end)
+{
+    QDate todayDate = today;
+    QDate beginDate = begin;
+    QDate endDate = end;
+
+    year[0]->setText(QString::number(todayDate.year()));
+    year[1]->setText(QString::number(beginDate.year()));
+    year[2]->setText(QString::number(endDate.year()));
+
+    if(todayDate.month()<10)
+        month[0]->setText(" "+QString::number(todayDate.month()));
+    else
+        month[0]->setText(QString::number(todayDate.month()));
+    if(beginDate.month()<10)
+        month[1]->setText(" "+QString::number(beginDate.month()));
+    else
+        month[1]->setText(QString::number(beginDate.month()));
+    if(endDate.month()<10)
+        month[2]->setText(" "+QString::number(endDate.month()));
+    else
+        month[2]->setText(QString::number(endDate.month()));
+
+    if(todayDate.day()<10)
+        day[0]->setText(" "+QString::number(todayDate.day()));
+    else
+        day[0]->setText(QString::number(todayDate.day()));
+    if(beginDate.day()<10)
+        day[1]->setText(" "+QString::number(beginDate.day()));
+    else
+        day[1]->setText(QString::number(beginDate.day()));
+    if(endDate.day()<10)
+        day[2]->setText(" "+QString::number(endDate.day()));
+    else
+        day[2]->setText(QString::number(endDate.day()));
+
+
+    if(todayDate.dayOfWeek()==1){
+        date->setText(tr("星期一"));
+    }
+    else if(todayDate.dayOfWeek()==2){
+        date->setText(tr("星期二"));
+    }
+    else if(todayDate.dayOfWeek()==3){
+        date->setText(tr("星期三"));
+    }
+    else if(todayDate.dayOfWeek()==4){
+        date->setText(tr("星期四"));
+    }
+    else if(todayDate.dayOfWeek()==5){
+        date->setText(tr("星期五"));
+    }
+    else if(todayDate.dayOfWeek()==6){
+        date->setText(tr("星期六"));
+    }
+    else if(todayDate.dayOfWeek()==7){
+        date->setText(tr("星期日"));
+    }
+    date->adjustSize();
+    year[0]->adjustSize();year[0]->adjustSize();
+    year[1]->adjustSize();year[0]->adjustSize();
+    year[2]->adjustSize();year[0]->adjustSize();
+    month[0]->adjustSize();
+    month[1]->adjustSize();
+    month[2]->adjustSize();
+    day[0]->adjustSize();
+    day[1]->adjustSize();
+    day[2]->adjustSize();
+}
+
+void HomeWindow::setTimer(int today, int total)
+{
+    totalTimeVaule = total*200/HOURS_WEEK;
+    hour=today/3600;
+    minute=today%3600/60;
+    second=today%60;
+
+    if(hour<10){
+        showhour->setText(" "+QString::number(hour));
+    }
+    else{
+        showhour->setText(QString::number(hour));
+    }
+    if(minute<10){
+        showminute->setText("0"+QString::number(minute));
+    }
+    else{
+        showminute->setText(QString::number(minute));
+    }
+    if(second<10){
+        showsecond->setText("0"+QString::number(second));
+    }
+    else{
+        showsecond->setText(QString::number(second));
+    }
+
+    showhour->adjustSize();
+    showminute->adjustSize();
+    showsecond->adjustSize();
+    update();
+}
+
+void HomeWindow::PlayUpdateBtnAnimation()
+{
+    level = 0;
+    addOne->move(movePos[level]);
+    addOne->show();
+    timerOpacity->stop();
+    timerOpacity->start(120);
 }
 
 void HomeWindow::createView()
@@ -220,6 +322,12 @@ void HomeWindow::createView()
     addOne->move(595,228);
     addOne->hide();
 
+    setThemeColor(themeColor);
+}
+
+void HomeWindow::setThemeColor(const int &_themeColor)
+{
+    themeColor = _themeColor;
     if(themeColor==0){
         updateBtn->setStyleSheet(
                 "QPushButton{background-color:#4FCFFF;color:white;border:none;border-radius:4px;}"
@@ -244,106 +352,14 @@ void HomeWindow::createView()
                 "QPushButton:pressed{background-color:#FF0000;}");
         addOne->setStyleSheet("background-color:none;color:#FF7F7F;border:none;");
     }
-
-    connect(updateBtn,SIGNAL(clicked()),this,SLOT(slotUpdateBtn()));
 }
 
-void HomeWindow::setDate()
+void HomeWindow::DoUpdateBtnAnimation()
 {
-    QDate todayDate = userData->getServerDate();
-    QDate beginDate = userData->getstartDate_own();
-    QDate endDate = userData->getEndDate_own();
-
-    year[0]->setText(QString::number(todayDate.year()));
-    year[1]->setText(QString::number(beginDate.year()));
-    year[2]->setText(QString::number(endDate.year()));
-
-    if(todayDate.month()<10)
-        month[0]->setText(" "+QString::number(todayDate.month()));
-    else
-        month[0]->setText(QString::number(todayDate.month()));
-    if(beginDate.month()<10)
-        month[1]->setText(" "+QString::number(beginDate.month()));
-    else
-        month[1]->setText(QString::number(beginDate.month()));
-    if(endDate.month()<10)
-        month[2]->setText(" "+QString::number(endDate.month()));
-    else
-        month[2]->setText(QString::number(endDate.month()));
-
-    if(todayDate.day()<10)
-        day[0]->setText(" "+QString::number(todayDate.day()));
-    else
-        day[0]->setText(QString::number(todayDate.day()));
-    if(beginDate.day()<10)
-        day[1]->setText(" "+QString::number(beginDate.day()));
-    else
-        day[1]->setText(QString::number(beginDate.day()));
-    if(endDate.day()<10)
-        day[2]->setText(" "+QString::number(endDate.day()));
-    else
-        day[2]->setText(QString::number(endDate.day()));
-
-
-    if(todayDate.dayOfWeek()==1){
-        date->setText(tr("星期一"));
-    }
-    else if(todayDate.dayOfWeek()==2){
-        date->setText(tr("星期二"));
-    }
-    else if(todayDate.dayOfWeek()==3){
-        date->setText(tr("星期三"));
-    }
-    else if(todayDate.dayOfWeek()==4){
-        date->setText(tr("星期四"));
-    }
-    else if(todayDate.dayOfWeek()==5){
-        date->setText(tr("星期五"));
-    }
-    else if(todayDate.dayOfWeek()==6){
-        date->setText(tr("星期六"));
-    }
-    else if(todayDate.dayOfWeek()==7){
-        date->setText(tr("星期日"));
-    }
-    date->adjustSize();
-    year[0]->adjustSize();year[0]->adjustSize();
-    year[1]->adjustSize();year[0]->adjustSize();
-    year[2]->adjustSize();year[0]->adjustSize();
-    month[0]->adjustSize();
-    month[1]->adjustSize();
-    month[2]->adjustSize();
-    day[0]->adjustSize();
-    day[1]->adjustSize();
-    day[2]->adjustSize();
-}
-
-void HomeWindow::slotUpdateBtn()
-{
-    if(!userData->getServerDate().isValid() || !userData->isGetServerTime){
-        http->getServerDateRequst();
-    }
-    if(monitor->isCanUpdate()){
-        if(userData->isLogin && !userData->getUserID().isEmpty() && !userData->getServerDate().isNull()){
-            timerOpacity->start(120);
-            updateBtnAnimation();
-        }
-    }
-    else{
-        qDebug()<<"更新失败";
-    }
-}
-
-void HomeWindow::updateBtnAnimation()
-{
-    if(level == 0 && monitor->isLabRouter() && userData->getTodayTime() >= 5){
-        userData->isAutoUpdate = false;
-        http->updateRecordRequst(userData->getUserID(),userData->getServerDate().toString(Qt::ISODate),
-                             userData->getTodayTime()+userData->getTimeCount());
-        addOne->show();
-    }
-    else if(level>9){
+    if(level>9){
         level = 0;
+        addOne->move(movePos[level]);
+        addOne->hide();
         timerOpacity->stop();
         return;
     }
@@ -352,42 +368,6 @@ void HomeWindow::updateBtnAnimation()
     opacityEffect->setOpacity(opacity[level]);
     addOne->move(movePos[level]);
     level++;
-}
-
-void HomeWindow::updateUserData()
-{
-    autoUpdate++;
-    if(autoUpdate>AUTO_UPDATE_INTERVAL && monitor->isCanUpdate() && userData->isLogin && monitor->isLabRouter()){
-        autoUpdate=0;
-        userData->isAutoUpdate = true;
-        http->updateRecordRequst(userData->getUserID(),userData->getServerDate().toString(Qt::ISODate),
-                                 userData->getTodayTime()+userData->getTimeCount());
-    }
-    if(hour<10){
-        showhour->setText(" "+QString::number(hour));
-    }
-    else{
-        showhour->setText(QString::number(hour));
-    }
-    if(minute<10){
-        showminute->setText("0"+QString::number(minute));
-    }
-    else{
-        showminute->setText(QString::number(minute));
-    }
-    if(second<10){
-        showsecond->setText("0"+QString::number(second));
-    }
-    else{
-        showsecond->setText(QString::number(second));
-    }
-
-    showhour->adjustSize();
-    showminute->adjustSize();
-    showsecond->adjustSize();
-    setDate();
-    setUserValue(userData->getTotalTime()+userData->getTimeCount(),userData->getTodayTime()+userData->getTimeCount());
-    update();
 }
 
 void HomeWindow::paintEvent(QPaintEvent *)

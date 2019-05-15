@@ -11,9 +11,7 @@ RegistDialog::RegistDialog(QDialog *parent) : QDialog(parent)
     bgPalette.setColor(QPalette::Background, QColor("#FFF"));
     this->setPalette(bgPalette);
     this->setAutoFillBackground(true);
-    http = DOHelper::getDOHelper();
-    userData = UserData::getUserData();
-    themeColor = userData->getThemeColor();
+    themeColor = 1;
     initLayout();
 }
 
@@ -151,13 +149,28 @@ void RegistDialog::soltConfirmBtn()
             delete validator;
             return;
         }
-        http->regRequst(accountEdit->text(),userNameEdit->text(),pwdEdit->text(),
-                        sexComboBox->currentText(),gradeEdit->text());
+        User user;
+        user.setAccount(accountEdit->text().trimmed());
+        user.setPassword(pwdEdit->text().trimmed());
+        user.setGrade(gradeEdit->text().trimmed());
+        user.setSex(sexComboBox->currentText());
+        user.setTrueName(userNameEdit->text().trimmed());
+        m_server->userRegister(user);
 
         delete validator;
 
-        this->close();
     }
+}
+
+void RegistDialog::Server_RegisterFail(const QString &message)
+{
+    QMessageBox::information(this,"注册失败",message);
+}
+
+void RegistDialog::Server_RegisterSuccess(const QString &message)
+{
+    QMessageBox::information(this,"环创工作室计时器新用户",message);
+    this->close();
 }
 
 void RegistDialog::mousePressEvent(QMouseEvent *event)
@@ -204,4 +217,11 @@ void RegistDialog::paintEvent(QPaintEvent *)
         painter.setPen(color);
         painter.drawPath(path);
     }
+}
+
+void RegistDialog::setServer(MyServer *server)
+{
+    m_server = server;
+    connect(m_server,SIGNAL(sError(QString)),this,SLOT(Server_RegisterFail(QString)));
+    connect(m_server,SIGNAL(sRegister(QString)),this,SLOT(Server_RegisterSuccess(QString)));
 }

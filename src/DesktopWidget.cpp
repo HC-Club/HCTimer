@@ -24,8 +24,6 @@ DesktopWidget::DesktopWidget(QWidget *parent)
 
     bPressFlag = false;
 
-    userData = UserData::getUserData();
-    http = DOHelper::getDOHelper();
     monitor = Monitor::getMonitor();
 
 
@@ -96,14 +94,7 @@ void DesktopWidget::initInterface()
 
 void DesktopWidget::slotUpdateBtn()
 {
-    if(monitor->isCanUpdate()){
-        if(userData->isLogin && !userData->getUserID().isEmpty() && !userData->getServerDate().isNull())
-            http->updateRecordRequst(userData->getUserID(),userData->getServerDate().toString(Qt::ISODate),
-                                 userData->getTodayTime()+userData->getTimeCount());
-    }
-    else{
-        qDebug()<<"更新失败";
-    }
+
 }
 
 void DesktopWidget::slotStartTomatoTime()
